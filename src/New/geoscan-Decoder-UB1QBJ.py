@@ -29,16 +29,16 @@ def start_socket(ip, port):
 
 def main(s):
     while True:
-        frame = s.recv(1024).hex()
+        frame = s.recv(2048).hex()
         frame = frame[74:]
         reply = [frame[i:i+2] for i in range(0, len(frame), 2)]
         frame = ' '.join(reply)
         img_sync = frame[:11]
-        if(int(str(frame[23:].find('ff d8'))) >= int(0)):
+        if(int(str(frame[23:].find(' ff d8 '))) >= int(0)):
             reg=4
             name=str(time.strftime("%m-%d_%H-%M"))
             with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
-                bitstring.BitArray(hex=str(frame[23:]).replace(' ', '')).tofile(out_file)
+                bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
             with open('data.ts', 'w') as o:
                 o.write('out_iamge_'+str(name)+'.jpg')
         if(str(img_sync) == str('01 00 3e 05')):    
@@ -47,16 +47,16 @@ def main(s):
             check_value=bitstring.BitStream(hex=str(str(str(chb1)+str(chb2)))).read('uint')
             if(int(check_value)==int(reg+56)):
                 with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
-                    bitstring.BitArray(hex=str(frame[23:]).replace(' ', '')).tofile(out_file)
+                    bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
                 reg+=56
             else:
                 skipped=int(check_value-reg)/56
                 with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
                     bitstring.BitArray(hex=str(str('0'*112)*int(skipped))).tofile(out_file)
                 reg+=int(56*int(skipped))
-        if(int(str(frame[23:].find('ff d9'))) >= int(0)):
+        if(int(str(frame[23:].find(' ff d9 '))) >= int(0)):
             with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
-                bitstring.BitArray(hex=str(frame[23:]).replace(' ', '')).tofile(out_file)
+                bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
 
 if(__name__=='__main__'):
     ip=parser.parse_args().ip
