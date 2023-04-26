@@ -35,16 +35,22 @@ def main(s):
         frame = ' '.join(reply)
         img_sync = frame[:11]
         if(int(str(frame[23:].find(' ff d8 '))) >= int(0)):
-            reg=4
+            chb1=frame[21:23]
+            chb2=frame[18:20]
+            chb3=frame[15:17]
+            reg=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
             name=str(time.strftime("%m-%d_%H-%M"))
+            x=int(str(frame[23:].find(' ff d8 ')))
             with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
-                bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
+                bitstring.BitArray(hex=str(str(frame[23+x:]).replace(' ', ''))).tofile(out_file)
             with open('data.ts', 'w') as o:
                 o.write('out_iamge_'+str(name)+'.jpg')
         if(str(img_sync) == str('01 00 3e 05')):    
-            chb1=frame[18:20]
-            chb2=frame[15:17]
-            check_value=bitstring.BitStream(hex=str(str(str(chb1)+str(chb2)))).read('uint')
+            chb1=frame[21:23]
+            chb2=frame[18:20]
+            chb3=frame[15:17]
+            check_value=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
+            #print('reg: '+str(reg)+' check_value: '+str(check_value))
             if(int(check_value)==int(reg+56)):
                 with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
                     bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
