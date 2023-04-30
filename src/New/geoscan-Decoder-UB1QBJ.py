@@ -1,6 +1,9 @@
 import sys, socket, argparse, time, bitstring
 from datetime import datetime
 
+name=str(time.strftime("%m-%d_%H-%M"))
+reg=0
+
 parser = argparse.ArgumentParser()
 parser.add_argument("-p", "--port", help="port")
 parser.add_argument("-ip", "--ip", help="ip")
@@ -39,7 +42,7 @@ def telemetry_decoder(data):
     t_x_n=bitstring.BitStream(hex=data[26:28]).read('int')
     t_y_p=bitstring.BitStream(hex=data[28:30]).read('int')
     t_y_n=bitstring.BitStream(hex=data[30:32]).read('int')
-    t_z_p=bitstring.BitStream(hex=data[32:34]).read('int')
+    #t_z_p=bitstring.BitStream(hex=data[32:34]).read('int')
     t_z_n=bitstring.BitStream(hex=data[34:36]).read('int')
     t_bat1=bitstring.BitStream(hex=data[36:38]).read('int')
     t_bat2=bitstring.BitStream(hex=data[38:40]).read('int')
@@ -67,6 +70,7 @@ def telemetry_decoder(data):
         out_tlm_file.write(str(rssi)+'\n')
 
 def main(s):
+    global reg, name
     while True:
         frame = s.recv(2048).hex()
         frame = frame[74:]
@@ -108,8 +112,6 @@ def main(s):
 if(__name__=='__main__'):
     ip=parser.parse_args().ip
     port=parser.parse_args().port
-    reg=0
-    name=str(time.strftime("%m-%d_%H-%M"))
     s=start_socket(ip=ip, port=int(port))
     agw_connect(s=s)
     main(s=s)
