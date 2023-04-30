@@ -107,7 +107,6 @@ def main(s):
                 bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
         if(str(frame[:18]) == str('84 8a 82 86 9e 9c ')):
             telemetry_decoder(data=str(str(frame).replace(' ', '')))
-        
 
 if(__name__=='__main__'):
     ip=parser.parse_args().ip
