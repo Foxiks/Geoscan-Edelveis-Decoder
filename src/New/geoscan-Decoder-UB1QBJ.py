@@ -101,6 +101,7 @@ def main(s):
                 skipped=int(check_value-reg)/56
                 with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
                     bitstring.BitArray(hex=str(str('0'*112)*int(skipped))).tofile(out_file)
+                    bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
                 reg+=int(56*int(skipped))
         if(int(str(frame[23:].find(' ff d9 '))) >= int(0)):
             with open('out_iamge_'+str(name)+'.jpg', 'ab') as out_file:
