@@ -11,3 +11,16 @@ Now it's a release for windows. It works on AGWPE (TCP). Program launch order:
 4. Click on "Start decoder" (If everything is fine, you will receive a message about successful connection.)
 5. Click on "Read image" -> To display the photo in real time. The photo will also be in the folder with the decoder
 ```
+## Build from source
+1. Install modules:
+```
+pip install bitstring, pyinstaller
+```
+2. Building the program:
+```
+pyinstaller <params> geoscan-Decoder-UB1QBJ.py
+```
+3. Run decoder:
+```
+geoscan-Decoder-UB1QBJ -ip (ip) -p (port)
+```
