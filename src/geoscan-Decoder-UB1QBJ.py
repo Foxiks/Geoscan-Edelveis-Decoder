@@ -99,8 +99,11 @@ def main(s):
                 reg+=56
             else:
                 skipped=int(check_value-reg)/56
+                lenz=112*int(skipped)
+                if(lenz == 224):
+                    lenz = 112
                 with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
-                    bitstring.BitArray(hex=str(str('0'*112)*int(skipped))).tofile(out_file)
+                    bitstring.BitArray(hex=str(str('0'*lenz))).tofile(out_file)
                     bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
                 reg+=int(56*int(skipped))
         if(int(str(frame[23:].find(' ff d9 '))) >= int(0)):
