@@ -71,46 +71,61 @@ def telemetry_decoder(data):
 
 def main(s):
     global reg, name
+    flag1=True
     while True:
         frame = s.recv(2048).hex()
         frame = frame[74:]
         reply = [frame[i:i+2] for i in range(0, len(frame), 2)]
         frame = ' '.join(reply)
         img_sync = frame[:11]
-        if(int(str(frame.find(' ff d8 ff db '))) >= int(0)):
-            chb1=frame[21:23]
-            chb2=frame[18:20]
-            chb3=frame[15:17]
-            reg=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
-            name=str(time.strftime("%m-%d_%H-%M-%S"))
-            x=int(str(frame[23:].find(' ff d8 ')))
-            with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
-                bitstring.BitArray(hex=str(str(frame[23+x:]).replace(' ', ''))).tofile(out_file)
-            with open('data.ts', 'w') as o:
-                o.write('out_image_'+str(name)+'.jpg')
-        if(str(img_sync) == str('01 00 3e 05')):    
-            chb1=frame[21:23]
-            chb2=frame[18:20]
-            chb3=frame[15:17]
-            check_value=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
-            if(int(check_value)==int(reg+56)):
+        if(flag1):
+            if(int(str(frame.find(' ff d8 ff '))) >= int(0)):
+                chb1=frame[21:23]
+                chb2=frame[18:20]
+                chb3=frame[15:17]
+                reg=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
+                name=str(time.strftime("%m-%d_%H-%M-%S"))
+                x=int(str(frame[23:].find(' ff d8 ')))
+                with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
+                    bitstring.BitArray(hex=str(str(frame[23+x:]).replace(' ', ''))).tofile(out_file)
+                with open('data.ts', 'w') as o:
+                    o.write('out_image_'+str(name)+'.jpg')
+                flag1=False
+            elif(str(img_sync) == str('01 00 3e 05')):
+                chb1=frame[21:23]
+                chb2=frame[18:20]
+                chb3=frame[15:17]
+                reg=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
+                x=int(str(frame[23:].find(' ff d8 ')))
+                with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
+                    bitstring.BitArray(hex=str(str(frame[23+x:]).replace(' ', ''))).tofile(out_file)
+                with open('data.ts', 'w') as o:
+                    o.write('out_image_'+str(name)+'.jpg')
+                    flag1=False
+        else:
+            if(str(img_sync) == str('01 00 3e 05')):    
+                chb1=frame[21:23]
+                chb2=frame[18:20]
+                chb3=frame[15:17]
+                check_value=bitstring.BitStream(hex=str(str(chb1)+str(chb2)+str(chb3))).read('uint')
+                if(int(check_value)==int(reg+56)):
+                    with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
+                        bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
+                    reg+=56
+                else:
+                    skipped=int(check_value-reg)/56
+                    lenz=112*int(skipped)
+                    if(lenz == 224):
+                        lenz = 112
+                    with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
+                        bitstring.BitArray(hex=str(str('0'*lenz))).tofile(out_file)
+                        bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
+                    reg+=int(56*int(skipped))
+            elif(int(str(frame[23:].find(' ff d9 '))) >= int(0)):
                 with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
                     bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
-                reg+=56
-            else:
-                skipped=int(check_value-reg)/56
-                lenz=112*int(skipped)
-                if(lenz == 224):
-                    lenz = 112
-                with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
-                    bitstring.BitArray(hex=str(str('0'*lenz))).tofile(out_file)
-                    bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
-                reg+=int(56*int(skipped))
-        if(int(str(frame[23:].find(' ff d9 '))) >= int(0)):
-            with open('out_image_'+str(name)+'.jpg', 'ab') as out_file:
-                bitstring.BitArray(hex=str(str(frame[23:]).replace(' ', ''))).tofile(out_file)
-        if(str(frame[:18]) == str('84 8a 82 86 9e 9c ')):
-            telemetry_decoder(data=str(str(frame).replace(' ', '')))
+            if(str(frame[:18]) == str('84 8a 82 86 9e 9c ')):
+                telemetry_decoder(data=str(str(frame).replace(' ', '')))
 
 if(__name__=='__main__'):
     ip=parser.parse_args().ip
